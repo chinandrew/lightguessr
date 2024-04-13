@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guess the f-stop</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background-color: #4c4c4c;
+        color: #fff;
+        padding: 4px 0;
+        text-align: center;
+    }
+    .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .question {
+        margin-bottom: 20px;
+    }
+    button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0056b3;
+    }
+    .answer-feedback {
+        font-weight: bold;
+        margin-top: 10px;
+    }
+    .correct {
+        color: green;
+    }
+    .incorrect {
+        color: red;
+    }
+</style>
+
+</head>
+<body>
+<header>
+    <h1>Guess the f-stop</h1>
+</header>
+<div class="container">
+    <div class="question" id="question" style="display: none;"></div>
+    <img id="image" src="" alt="Question Image" style="max-width: 100%; margin-bottom: 10px; display: none;">
+    <select id="answer" style="display: none;"></select>
+    <div class="answer-feedback" id="answer-feedback" style="display: none;"></div>
+    <p id="instructions">Guess the aperture used for the picture. Score is total number of stops off from true value, so lower is better.</p>
+    <button onclick="startQuiz()" id="startButton">Start</button>
+    <button onclick="checkAnswer()" id="checkButton" style="display: none;">Check Answer</button>
+    <button onclick="nextQuestion()" id="nextButton" style="display: none;">Next</button>
+    <div id="score" style="display: none;"></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js "></script>
+<script>
+    const fstops = ["f1.4", "f1.6", "f1.8", "f2.0", "f2.2", "f2.5", "f2.8", "f3.2", "f3.5", "f4", "f4.5", "f5", "f5.6", "f6.3", "f7.1", "f8", "f9", "f10", "f11", "f13", "f14", "f16", "f18", "f20", "f22"];
+    const all_questions = [
+        { 
+            question: "ISO: 3200, Shutter Speed: 1/125s, Sony Alpha 7 III", 
+            imageUrl: "https://images.unsplash.com/photo-1710390827915-2c53d32be539?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-couple-of-people-that-are-standing-outside-of-a-building-VM4wDDS4jlA",
+            answer: "f2.8" 
+        },
+        { 
+            question: "ISO: 100, Shutter Speed: 1/250s, Canon EOS 5D Mark III", 
+            imageUrl: "https://images.unsplash.com/photo-1712828816586-32503ef619f0?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-couple-of-people-walking-down-a-street-next-to-tall-buildings-nglwPoQOpFw",
+            answer: "f6.3" 
+        },
+        { 
+            question: "ISO: 50, Shutter Speed: 1/400s, Sony Alpha 7C", 
+            imageUrl: "https://images.unsplash.com/photo-1712876445548-e7ffc70d42a6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-city-street-filled-with-traffic-next-to-tall-buildings-D7yuvcROuyE",
+            answer: "f3.2" 
+        },
+        { 
+            question: "ISO: 50, Shutter Speed: 1/100s, Nikon Z6 II", 
+            imageUrl: "https://images.unsplash.com/photo-1712415341931-96aff76a42e9?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-group-of-people-walking-down-a-street-at-night-DQ28tllxeHM",
+            answer: "f2.0" 
+        },
+        { 
+            question: "ISO: 64, Shutter Speed: 1/80s, Fujifilm X-T5", 
+            imageUrl: "https://images.unsplash.com/photo-1712112187978-ff63481fd933?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-train-traveling-over-a-bridge-next-to-tall-buildings-m9U2p94Ftzs",
+            answer: "f2.0" 
+        },
+        { 
+            question: "ISO: 100, Shutter Speed: 0.4s, Nikon Z6 II", 
+            imageUrl: "https://images.unsplash.com/photo-1711465582458-54909c517a2a?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-crowd-of-people-walking-across-a-street-at-night-DzQsExG9H-o",
+            answer: "f7.1" 
+        },
+        { 
+            question: "ISO: 200, Shutter Speed: 1/5s, Sony Alpha 7 IV", 
+            imageUrl: "https://images.unsplash.com/photo-1710781403938-5a29304f37ca?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
+            imageSource: "https://unsplash.com/photos/a-group-of-people-moving-down-an-escalator-QIgWfSX4kRc",
+            answer: "f6.3" 
+        }
+    ];
+    const numberOfQuestions = 5;
+    let currentQuestion = 0;
+    let score = 0;
+    let questions = [];
+
+    function generateQuestions() {
+        questions = _.sample(all_questions, numberOfQuestions)
+    }
+
+
+    function startQuiz() {
+        document.getElementById('instructions').style.display = 'none'; // Hide Instructions
+        document.getElementById('startButton').style.display = 'none'; // Hide Start Quiz button
+        generateQuestions();
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const questionElement = document.getElementById('question');
+        const imageElement = document.getElementById('image');
+        const answerElement = document.getElementById('answer');
+        const feedbackElement = document.getElementById('answer-feedback');
+        questionElement.style.display = 'block';
+        imageElement.style.display = 'block';
+        answerElement.style.display = 'inline-block';
+        feedbackElement.style.display = 'inline-block';
+        questionElement.textContent = `${currentQuestion+1}/${numberOfQuestions} ${questions[currentQuestion].question}`;
+        imageElement.src = questions[currentQuestion].imageUrl;
+        answerElement.innerHTML = '';
+        fstops.forEach(option => {
+            const optionElement = document.createElement('option');
+            optionElement.text = option;
+            answerElement.add(optionElement);
+        });
+        feedbackElement.textContent = '';
+        document.getElementById('checkButton').style.display = 'block'; // Show Check Answer button
+        document.getElementById('nextButton').style.display = 'none'; // Hide Next button
+    }
+
+    function checkAnswer() {
+        const selectedAnswer = document.getElementById('answer').value;
+        const correctAnswer = questions[currentQuestion].answer;
+        const feedbackElement = document.getElementById('answer-feedback');
+        if (selectedAnswer === questions[currentQuestion].answer) {
+            feedbackElement.textContent = `True aperture: ${correctAnswer}. Current score: ${Math.round(score*100)/100}.`;
+            feedbackElement.classList.add('correct');
+            feedbackElement.classList.remove('incorrect');
+        } else {
+            const distance = Math.abs(fstops.indexOf(questions[currentQuestion].answer) - fstops.indexOf(selectedAnswer))/3;
+            score += distance
+            feedbackElement.textContent = `True aperture: ${correctAnswer} (Error: ${Math.round(distance*100)/100} stops). Current score: ${Math.round(score*100)/100} stops.`;
+            feedbackElement.classList.add('incorrect');
+            feedbackElement.classList.remove('correct');
+        }
+        document.getElementById('checkButton').style.display = 'none'; // Hide Check Answer button
+        if (currentQuestion === questions.length - 1) {
+            document.getElementById('nextButton').textContent = 'Show Final Score'; // Change button text
+        }
+        document.getElementById('nextButton').style.display = 'block'; // Show Next button
+    }
+
+    function nextQuestion() {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+        } else {
+            showScore();
+        }
+    }
+
+    function showScore() {
+        const scoreElement = document.getElementById('score');
+        scoreElement.textContent = `Final score: ${Math.round(score*100)/100} stops. Average error:  ${Math.round(score/questions.length*100)/100} stops.`;
+        scoreElement.style.display = 'block';
+        document.getElementById('nextButton').style.display = 'none'; // Hide Next button
+        const restartButton = document.createElement('button');
+        restartButton.textContent = 'Restart';
+        restartButton.onclick = function() {
+            document.getElementById('nextButton').textContent = 'Next'
+            currentQuestion = 0;
+            score = 0;
+            scoreElement.style.display = 'none';
+            generateQuestions();
+            loadQuestion();
+        };
+        scoreElement.appendChild(restartButton);
+    }
+
+    // Load the first question when the page loads
+    window.onload = function() {
+        document.getElementById('startButton').style.display = 'block'; // Show Start Quiz button
+    };
+</script>
+</body>
+</html>
+  
