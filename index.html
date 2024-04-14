@@ -175,10 +175,13 @@
         questions.forEach((questionObj, index) => {
             const listItem = document.createElement('li');
             listItem.textContent = `${questionObj.make} ${questionObj.model}, ${questionObj.focal_length}mm, ${questionObj.exposure_time}s, ISO${questionObj.iso}, ${questionObj.aperture}. Selected ${questionObj.selectedAnswer} (Error: ${Math.round(questionObj.distance*100)/100} stops)`;
+            const image_link = document.createElement('a');
+            image_link.href = questionObj.imageSource
             const image = document.createElement('img');
             image.src = questionObj.imageUrl;
             image.style= "max-width: 100%; margin-top: 10px; margin-bottom: 10px"
-            listItem.appendChild(image);
+            image_link.appendChild(image);
+            listItem.appendChild(image_link);
             questionListElement.appendChild(listItem);
         });
         questionListElement.style.display = 'block'; // Show question list
