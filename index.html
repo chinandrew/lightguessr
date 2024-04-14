@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link href='https://fonts.googleapis.com/css?family=Lato' rel='stylesheet'>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guess the f-stop</title>
 <style>
     body {
-        font-family: Arial, sans-serif;
+        font-family: 'Lato', sans-serif;
         margin: 0;
         padding: 0;
     }
@@ -34,7 +35,7 @@
     button:hover {
         background-color: #0056b3;
     }
-    .answer-feedback {
+    .feedback {
         font-weight: bold;
         margin-top: 10px;
     }
@@ -54,12 +55,12 @@
 <div class="container">
     <div class="question" id="question" style="display: none;"></div>
     <select id="answer" style="display: none;"></select>
-    <div class="answer-feedback" id="answer-feedback" style="display: none;"></div>
+    <div class="feedback" id="feedback" style="display: none;"></div>
     <p id="instructions">Guess the aperture used for the picture. Score is total number of stops off from true value, so lower is better. </p>
     <button onclick="startQuiz()" id="startButton">Start</button>
     <button onclick="checkAnswer()" id="checkButton" style="display: none; margin-top: 10px; margin-bottom: 10px;">Submit</button>
     <button onclick="nextQuestion()" id="nextButton" style="display: none; margin-top: 10px; margin-bottom: 10px;">Next</button>
-        <a  id="image-src" href="" target="_blank">
+    <a  id="image-src" href="" target="_blank" rel="noopener noreferrer">
     <img id="image" src="" alt="Question Image" style="max-width: 100%; margin-bottom: 10px; display: none;">
     </a>
     <div id="score" style="display: none;"></div>
@@ -70,7 +71,7 @@
 <script src="questions.js"></script>
 <script>
     const fstops = ["f1.4", "f1.6", "f1.8", "f2", "f2.2", "f2.5", "f2.8", "f3.2", "f3.5", "f4", "f4.5", "f5", "f5.6", "f6.3", "f7.1", "f8", "f9", "f10", "f11", "f13", "f14", "f16", "f18", "f20", "f22"];
-    const numberOfQuestions = 5;
+    const numberOfQuestions = 10;
     let currentQuestion = 0;
     let score = 0;
     let questions = [];
@@ -92,13 +93,13 @@
         const questionElement = document.getElementById('question');
         const imageElement = document.getElementById('image');
         const answerElement = document.getElementById('answer');
-        const feedbackElement = document.getElementById('answer-feedback');
+        const feedbackElement = document.getElementById('feedback');
         questionElement.style.display = 'block';
         imageElement.style.display = 'block';
         answerElement.style.display = 'inline-block';
         feedbackElement.style.display = 'inline-block';
         document.getElementById('image-src').href = questions[currentQuestion].imageSource;
-        questionElement.textContent = `Question ${currentQuestion+1} of ${numberOfQuestions}: ${questions[currentQuestion].question}`;
+        questionElement.textContent = `Question ${currentQuestion+1} of ${numberOfQuestions}: ${questions[currentQuestion].make} ${questions[currentQuestion].model}, ${questions[currentQuestion].focal_length}mm, ${questions[currentQuestion].exposure_time}s, ISO${questions[currentQuestion].iso}.`;
         imageElement.src = questions[currentQuestion].imageUrl;
         imageElement.href = questions[currentQuestion].imageSource;
         answerElement.innerHTML = '';
@@ -114,15 +115,15 @@
 
     function checkAnswer() {
         const selectedAnswer = document.getElementById('answer').value;
-        const correctAnswer = questions[currentQuestion].answer;
-        const feedbackElement = document.getElementById('answer-feedback');
+        const correctAnswer = questions[currentQuestion].aperture;
+        const feedbackElement = document.getElementById('feedback');
         let distance = 0;
-        if (selectedAnswer === questions[currentQuestion].answer) {
+        if (selectedAnswer === questions[currentQuestion].aperture) {
             feedbackElement.textContent = `True aperture: ${correctAnswer}. Current score: ${Math.round(score*100)/100}.`;
             feedbackElement.classList.add('correct');
             feedbackElement.classList.remove('incorrect');
         } else {
-            distance = Math.abs(fstops.indexOf(questions[currentQuestion].answer) - fstops.indexOf(selectedAnswer))/3;
+            distance = Math.abs(fstops.indexOf(questions[currentQuestion].aperture) - fstops.indexOf(selectedAnswer))/3;
             score += distance
             feedbackElement.textContent = `True aperture: ${correctAnswer} (Error: ${Math.round(distance*100)/100} stops). Current score: ${Math.round(score*100)/100} stops.`;
             feedbackElement.classList.add('incorrect');
@@ -150,7 +151,7 @@
         document.getElementById('question').style.display = 'none';
         document.getElementById('image').style.display = 'none';
         document.getElementById('answer').style.display = 'none';
-        document.getElementById('answer-feedback').style.display = 'none';
+        document.getElementById('feedback').style.display = 'none';
         const scoreElement = document.getElementById('score');
         scoreElement.textContent = `Final score: ${Math.round(score*100)/100} stops. Average error:  ${Math.round(score/questions.length*100)/100} stops. `;
         scoreElement.style.display = 'block';
@@ -173,7 +174,7 @@
         questionListElement.innerHTML = '';
         questions.forEach((questionObj, index) => {
             const listItem = document.createElement('li');
-            listItem.textContent = `${questionObj.question}, Aperture: ${questionObj.answer}. Selected ${questionObj.selectedAnswer} (Error: ${Math.round(questionObj.distance*100)/100} stops)`;
+            listItem.textContent = `${questionObj.make} ${questionObj.model}, ${questionObj.focal_length}mm, ${questionObj.exposure_time}s, ISO${questionObj.iso}, ${questionObj.aperture}. Selected ${questionObj.selectedAnswer} (Error: ${Math.round(questionObj.distance*100)/100} stops)`;
             const image = document.createElement('img');
             image.src = questionObj.imageUrl;
             image.style= "max-width: 100%; margin-top: 10px; margin-bottom: 10px"
