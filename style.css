@@ -12,6 +12,7 @@ header a {
     text-decoration: none; /* Remove underlines */
     display: block; /* Extend the clickable area */
     padding: 4px 0;
+    color: #fff;
 }
 header a:visited {
     color: #fff; 
