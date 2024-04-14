@@ -6,8 +6,15 @@ body {
 header {
     background-color: #4c4c4c;
     color: #fff;
-    padding: 4px 0;
     text-align: center;
+}
+header a {
+    text-decoration: none; /* Remove underlines */
+    display: block; /* Extend the clickable area */
+    padding: 4px 0;
+}
+header a:visited {
+    color: #fff; 
 }
 .container {
     max-width: 800px;
