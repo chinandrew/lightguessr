@@ -53,12 +53,14 @@
 </header>
 <div class="container">
     <div class="question" id="question" style="display: none;"></div>
+    <a  id="image-src" href="">
     <img id="image" src="" alt="Question Image" style="max-width: 100%; margin-bottom: 10px; display: none;">
+    </a>
     <select id="answer" style="display: none;"></select>
     <div class="answer-feedback" id="answer-feedback" style="display: none;"></div>
     <p id="instructions">Guess the aperture used for the picture. Score is total number of stops off from true value, so lower is better.</p>
     <button onclick="startQuiz()" id="startButton">Start</button>
-    <button onclick="checkAnswer()" id="checkButton" style="display: none;">Check Answer</button>
+    <button onclick="checkAnswer()" id="checkButton" style="display: none;">Submit</button>
     <button onclick="nextQuestion()" id="nextButton" style="display: none;">Next</button>
     <div id="score" style="display: none;"></div>
 </div>
@@ -136,8 +138,10 @@
         imageElement.style.display = 'block';
         answerElement.style.display = 'inline-block';
         feedbackElement.style.display = 'inline-block';
+        document.getElementById('image-src').href = questions[currentQuestion].imageSource;
         questionElement.textContent = `${currentQuestion+1}/${numberOfQuestions} ${questions[currentQuestion].question}`;
         imageElement.src = questions[currentQuestion].imageUrl;
+        imageElement.href = questions[currentQuestion].imageSource;
         answerElement.innerHTML = '';
         fstops.forEach(option => {
             const optionElement = document.createElement('option');
