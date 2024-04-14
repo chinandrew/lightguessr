@@ -17,7 +17,7 @@
         text-align: center;
     }
     .container {
-        max-width: 700px;
+        max-width: 800px;
         margin: 0 auto;
         padding: 20px;
     }
@@ -53,66 +53,23 @@
 </header>
 <div class="container">
     <div class="question" id="question" style="display: none;"></div>
-    <a  id="image-src" href="">
-    <img id="image" src="" alt="Question Image" style="max-width: 100%; margin-bottom: 10px; display: none;">
-    </a>
     <select id="answer" style="display: none;"></select>
     <div class="answer-feedback" id="answer-feedback" style="display: none;"></div>
     <p id="instructions">Guess the aperture used for the picture. Score is total number of stops off from true value, so lower is better. </p>
     <button onclick="startQuiz()" id="startButton">Start</button>
-    <button onclick="checkAnswer()" id="checkButton" style="display: none;">Submit</button>
-    <button onclick="nextQuestion()" id="nextButton" style="display: none;">Next</button>
+    <button onclick="checkAnswer()" id="checkButton" style="display: none; margin-top: 10px; margin-bottom: 10px;">Submit</button>
+    <button onclick="nextQuestion()" id="nextButton" style="display: none; margin-top: 10px; margin-bottom: 10px;">Next</button>
+        <a  id="image-src" href="" target="_blank">
+    <img id="image" src="" alt="Question Image" style="max-width: 100%; margin-bottom: 10px; display: none;">
+    </a>
     <div id="score" style="display: none;"></div>
     <ol id="questionList" class="question-list" style="display: none;"></ol>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/underscore@1.13.6/underscore-umd-min.js "></script>
+<script src="questions.js"></script>
 <script>
-    const fstops = ["f1.4", "f1.6", "f1.8", "f2.0", "f2.2", "f2.5", "f2.8", "f3.2", "f3.5", "f4", "f4.5", "f5", "f5.6", "f6.3", "f7.1", "f8", "f9", "f10", "f11", "f13", "f14", "f16", "f18", "f20", "f22"];
-    const all_questions = [
-        { 
-            question: "Sony Alpha 7 III, ISO: 3200, Shutter Speed: 1/125s", 
-            imageUrl: "https://images.unsplash.com/photo-1710390827915-2c53d32be539?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-couple-of-people-that-are-standing-outside-of-a-building-VM4wDDS4jlA",
-            answer: "f2.8" 
-        },
-        { 
-            question: "Canon EOS 5D Mark III, ISO: 100, Shutter Speed: 1/250s", 
-            imageUrl: "https://images.unsplash.com/photo-1712828816586-32503ef619f0?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-couple-of-people-walking-down-a-street-next-to-tall-buildings-nglwPoQOpFw",
-            answer: "f6.3" 
-        },
-        { 
-            question: "Sony Alpha 7C, ISO: 50, Shutter Speed: 1/400s", 
-            imageUrl: "https://images.unsplash.com/photo-1712876445548-e7ffc70d42a6?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-city-street-filled-with-traffic-next-to-tall-buildings-D7yuvcROuyE",
-            answer: "f3.2" 
-        },
-        { 
-            question: "Nikon Z6 II, ISO: 50, Shutter Speed: 1/100s", 
-            imageUrl: "https://images.unsplash.com/photo-1712415341931-96aff76a42e9?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-group-of-people-walking-down-a-street-at-night-DQ28tllxeHM",
-            answer: "f2.0" 
-        },
-        { 
-            question: "Fujifilm X-T5, ISO: 64, Shutter Speed: 1/80s", 
-            imageUrl: "https://images.unsplash.com/photo-1712112187978-ff63481fd933?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-train-traveling-over-a-bridge-next-to-tall-buildings-m9U2p94Ftzs",
-            answer: "f2.0" 
-        },
-        { 
-            question: "Nikon Z6 II, ISO: 100, Shutter Speed: 0.4s", 
-            imageUrl: "https://images.unsplash.com/photo-1711465582458-54909c517a2a?q=80&w=1472&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-crowd-of-people-walking-across-a-street-at-night-DzQsExG9H-o",
-            answer: "f7.1" 
-        },
-        { 
-            question: "Sony Alpha 7 IV, ISO: 200, Shutter Speed: 1/5s", 
-            imageUrl: "https://images.unsplash.com/photo-1710781403938-5a29304f37ca?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D", 
-            imageSource: "https://unsplash.com/photos/a-group-of-people-moving-down-an-escalator-QIgWfSX4kRc",
-            answer: "f6.3" 
-        }
-    ];
+    const fstops = ["f1.4", "f1.6", "f1.8", "f2", "f2.2", "f2.5", "f2.8", "f3.2", "f3.5", "f4", "f4.5", "f5", "f5.6", "f6.3", "f7.1", "f8", "f9", "f10", "f11", "f13", "f14", "f16", "f18", "f20", "f22"];
     const numberOfQuestions = 5;
     let currentQuestion = 0;
     let score = 0;
@@ -159,21 +116,23 @@
         const selectedAnswer = document.getElementById('answer').value;
         const correctAnswer = questions[currentQuestion].answer;
         const feedbackElement = document.getElementById('answer-feedback');
+        let distance = 0;
         if (selectedAnswer === questions[currentQuestion].answer) {
             feedbackElement.textContent = `True aperture: ${correctAnswer}. Current score: ${Math.round(score*100)/100}.`;
             feedbackElement.classList.add('correct');
             feedbackElement.classList.remove('incorrect');
         } else {
-            const distance = Math.abs(fstops.indexOf(questions[currentQuestion].answer) - fstops.indexOf(selectedAnswer))/3;
+            distance = Math.abs(fstops.indexOf(questions[currentQuestion].answer) - fstops.indexOf(selectedAnswer))/3;
             score += distance
             feedbackElement.textContent = `True aperture: ${correctAnswer} (Error: ${Math.round(distance*100)/100} stops). Current score: ${Math.round(score*100)/100} stops.`;
             feedbackElement.classList.add('incorrect');
             feedbackElement.classList.remove('correct');
         }
         questions[currentQuestion].selectedAnswer = selectedAnswer;
+        questions[currentQuestion].distance = distance;
         document.getElementById('checkButton').style.display = 'none'; // Hide Check Answer button
         if (currentQuestion === questions.length - 1) {
-            document.getElementById('nextButton').textContent = 'Show Final Score'; // Change button text
+            document.getElementById('nextButton').textContent = 'Show Final Results'; // Change button text
         }
         document.getElementById('nextButton').style.display = 'block'; // Show Next button
     }
@@ -214,10 +173,10 @@
         questionListElement.innerHTML = '';
         questions.forEach((questionObj, index) => {
             const listItem = document.createElement('li');
-            listItem.textContent = `${questionObj.question}, Aperture: ${questionObj.answer} (Selected ${questionObj.selectedAnswer})`;
+            listItem.textContent = `${questionObj.question}, Aperture: ${questionObj.answer}. Selected ${questionObj.selectedAnswer} (Error: ${Math.round(questionObj.distance*100)/100} stops)`;
             const image = document.createElement('img');
             image.src = questionObj.imageUrl;
-            image.style= "max-width: 100%"
+            image.style= "max-width: 100%; margin-top: 10px; margin-bottom: 10px"
             listItem.appendChild(image);
             questionListElement.appendChild(listItem);
         });
