@@ -31,7 +31,7 @@ function loadQuestion() {
     questionElement.textContent = `Question ${currentQuestion+1} of ${numberOfQuestions}: ${questions[currentQuestion].make} ${questions[currentQuestion].model}, ${questions[currentQuestion].focal_length}mm, ${questions[currentQuestion].exposure_time}s, ISO${questions[currentQuestion].iso}.`;
     imageElement.src = questions[currentQuestion].imageUrl;
     imageElement.href = questions[currentQuestion].imageSource;
-    answerElement.innerHTML = '';
+    answerElement.textContent= '';
     fstops.forEach(option => {
         const optionElement = document.createElement('option');
         optionElement.text = option;
@@ -102,7 +102,7 @@ function showScore() {
 
     // Display questions, answers, and images
     const questionListElement = document.getElementById('questionList');
-    questionListElement.innerHTML = '';
+    questionListElement.textContent = '';
     questions.forEach((questionObj, index) => {
         const listItem = document.createElement('li');
         listItem.textContent = `${questionObj.make} ${questionObj.model}, ${questionObj.focal_length}mm, ${questionObj.exposure_time}s, ISO${questionObj.iso}, ${questionObj.aperture}. Selected ${questionObj.selectedAnswer} (Error: ${(questionObj.distance<0?"":"+") + Math.round(questionObj.distance*100)/100} stops)`;
